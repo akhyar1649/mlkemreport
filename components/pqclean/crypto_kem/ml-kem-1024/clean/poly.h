@@ -8,7 +8,7 @@
  * coeffs[0] + X*coeffs[1] + X^2*coeffs[2] + ... + X^{n-1}*coeffs[n-1]
  */
 typedef struct {
-    int16_t coeffs[KYBER_N];
+    int16_t coeffs[KYBER_N] __attribute__((aligned(16)));
 } poly;
 
 void PQCLEAN_MLKEM1024_CLEAN_poly_compress(uint8_t r[KYBER_POLYCOMPRESSEDBYTES], const poly *a);

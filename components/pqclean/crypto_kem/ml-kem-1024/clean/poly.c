@@ -6,6 +6,9 @@
 #include "symmetric.h"
 #include "verify.h"
 #include <stdint.h>
+#ifdef MLKEM_PIE
+#include "pie_vec.h"
+#endif
 
 /*************************************************
 * Name:        PQCLEAN_MLKEM1024_CLEAN_poly_compress
@@ -241,10 +244,120 @@ void PQCLEAN_MLKEM1024_CLEAN_poly_invntt_tomont(poly *r) {
 **************************************************/
 void PQCLEAN_MLKEM1024_CLEAN_poly_basemul_montgomery(poly *r, const poly *a, const poly *b) {
     size_t i;
+#ifdef MLKEM_PIE
+    const size_t nblocks = KYBER_N / 4;
+    int16_t avec0[8] __attribute__((aligned(16)));
+    int16_t bvec0[8] __attribute__((aligned(16)));
+    int16_t avec1[8] __attribute__((aligned(16)));
+    int16_t bvec1[8] __attribute__((aligned(16)));
+    int16_t prod_lo0[8] __attribute__((aligned(16)));
+    int16_t prod_hi0[8] __attribute__((aligned(16)));
+    int16_t prod_lo1[8] __attribute__((aligned(16)));
+    int16_t prod_hi1[8] __attribute__((aligned(16)));
+    int16_t mul0[8];
+    int16_t mul1[8];
+
+    for (i = 0; i + 1 < nblocks; i += 2) {
+        const int16_t *ap0 = &a->coeffs[4 * i];
+        const int16_t *bp0 = &b->coeffs[4 * i];
+        const int16_t *ap1 = &a->coeffs[4 * (i + 1)];
+        const int16_t *bp1 = &b->coeffs[4 * (i + 1)];
+        int16_t zeta0 = PQCLEAN_MLKEM1024_CLEAN_zetas[64 + i];
+        int16_t zeta1 = PQCLEAN_MLKEM1024_CLEAN_zetas[64 + i + 1];
+        int16_t zeta0_neg = (int16_t)-zeta0;
+        int16_t zeta1_neg = (int16_t)-zeta1;
+        int16_t *rp0 = &r->coeffs[4 * i];
+        int16_t *rp1 = &r->coeffs[4 * (i + 1)];
+
+        // Lane layout: [a1*b1, a1*b0, a0*b1, a0*b0, a3*b3, a3*b2, a2*b3, a2*b2]
+        avec0[0] = ap0[1];
+        bvec0[0] = bp0[1];
+        avec0[1] = ap0[1];
+        bvec0[1] = bp0[0];
+        avec0[2] = ap0[0];
+        bvec0[2] = bp0[1];
+        avec0[3] = ap0[0];
+        bvec0[3] = bp0[0];
+        avec0[4] = ap0[3];
+        bvec0[4] = bp0[3];
+        avec0[5] = ap0[3];
+        bvec0[5] = bp0[2];
+        avec0[6] = ap0[2];
+        bvec0[6] = bp0[3];
+        avec0[7] = ap0[2];
+        bvec0[7] = bp0[2];
+
+        avec1[0] = ap1[1];
+        bvec1[0] = bp1[1];
+        avec1[1] = ap1[1];
+        bvec1[1] = bp1[0];
+        avec1[2] = ap1[0];
+        bvec1[2] = bp1[1];
+        avec1[3] = ap1[0];
+        bvec1[3] = bp1[0];
+        avec1[4] = ap1[3];
+        bvec1[4] = bp1[3];
+        avec1[5] = ap1[3];
+        bvec1[5] = bp1[2];
+        avec1[6] = ap1[2];
+        bvec1[6] = bp1[3];
+        avec1[7] = ap1[2];
+        bvec1[7] = bp1[2];
+
+        mlkem_pie_mul_lohi_8x2(avec0, bvec0, prod_lo0, prod_hi0, avec1, bvec1, prod_lo1, prod_hi1);
+        mlkem_pie_montgomery_reduce_vec8x2(prod_lo0, prod_hi0, mul0, prod_lo1, prod_hi1, mul1);
+
+        rp0[0] = PQCLEAN_MLKEM1024_CLEAN_montgomery_reduce((int32_t)mul0[0] * zeta0) + mul0[3];
+        rp0[1] = mul0[2] + mul0[1];
+        rp0[2] = PQCLEAN_MLKEM1024_CLEAN_montgomery_reduce((int32_t)mul0[4] * zeta0_neg) + mul0[7];
+        rp0[3] = mul0[6] + mul0[5];
+
+        rp1[0] = PQCLEAN_MLKEM1024_CLEAN_montgomery_reduce((int32_t)mul1[0] * zeta1) + mul1[3];
+        rp1[1] = mul1[2] + mul1[1];
+        rp1[2] = PQCLEAN_MLKEM1024_CLEAN_montgomery_reduce((int32_t)mul1[4] * zeta1_neg) + mul1[7];
+        rp1[3] = mul1[6] + mul1[5];
+    }
+
+    if (i < nblocks) {
+        const int16_t *ap = &a->coeffs[4 * i];
+        const int16_t *bp = &b->coeffs[4 * i];
+        int16_t zeta = PQCLEAN_MLKEM1024_CLEAN_zetas[64 + i];
+        int16_t zeta_neg = (int16_t)-zeta;
+        int16_t prod_lo[8] __attribute__((aligned(16)));
+        int16_t prod_hi[8] __attribute__((aligned(16)));
+        int16_t mul[8];
+
+        avec0[0] = ap[1];
+        bvec0[0] = bp[1];
+        avec0[1] = ap[1];
+        bvec0[1] = bp[0];
+        avec0[2] = ap[0];
+        bvec0[2] = bp[1];
+        avec0[3] = ap[0];
+        bvec0[3] = bp[0];
+        avec0[4] = ap[3];
+        bvec0[4] = bp[3];
+        avec0[5] = ap[3];
+        bvec0[5] = bp[2];
+        avec0[6] = ap[2];
+        bvec0[6] = bp[3];
+        avec0[7] = ap[2];
+        bvec0[7] = bp[2];
+
+        mlkem_pie_mul_lohi_8(avec0, bvec0, prod_lo, prod_hi);
+        mlkem_pie_montgomery_reduce_vec8(prod_lo, prod_hi, mul);
+
+        r->coeffs[4 * i + 0] = PQCLEAN_MLKEM1024_CLEAN_montgomery_reduce((int32_t)mul[0] * zeta) + mul[3];
+        r->coeffs[4 * i + 1] = mul[2] + mul[1];
+        r->coeffs[4 * i + 2] = PQCLEAN_MLKEM1024_CLEAN_montgomery_reduce((int32_t)mul[4] * zeta_neg) + mul[7];
+        r->coeffs[4 * i + 3] = mul[6] + mul[5];
+    }
+#else
     for (i = 0; i < KYBER_N / 4; i++) {
         PQCLEAN_MLKEM1024_CLEAN_basemul(&r->coeffs[4 * i], &a->coeffs[4 * i], &b->coeffs[4 * i], PQCLEAN_MLKEM1024_CLEAN_zetas[64 + i]);
         PQCLEAN_MLKEM1024_CLEAN_basemul(&r->coeffs[4 * i + 2], &a->coeffs[4 * i + 2], &b->coeffs[4 * i + 2], -PQCLEAN_MLKEM1024_CLEAN_zetas[64 + i]);
     }
+#endif
 }
 
 /*************************************************
@@ -258,9 +371,33 @@ void PQCLEAN_MLKEM1024_CLEAN_poly_basemul_montgomery(poly *r, const poly *a, con
 void PQCLEAN_MLKEM1024_CLEAN_poly_tomont(poly *r) {
     size_t i;
     const int16_t f = (1ULL << 32) % KYBER_Q;
+#ifdef MLKEM_PIE
+    int16_t fvec[8] __attribute__((aligned(16)));
+    int16_t prod_lo0[8] __attribute__((aligned(16)));
+    int16_t prod_hi0[8] __attribute__((aligned(16)));
+    int16_t prod_lo1[8] __attribute__((aligned(16)));
+    int16_t prod_hi1[8] __attribute__((aligned(16)));
+    int16_t out0[8] __attribute__((aligned(16)));
+    int16_t out1[8] __attribute__((aligned(16)));
+
+    for (i = 0; i < 8; i++) {
+        fvec[i] = f;
+    }
+
+    for (i = 0; i < KYBER_N; i += 16) {
+        mlkem_pie_mul_lohi_8x2(fvec, &r->coeffs[i], prod_lo0, prod_hi0,
+                               fvec, &r->coeffs[i + 8], prod_lo1, prod_hi1);
+        mlkem_pie_montgomery_reduce_vec8x2(prod_lo0, prod_hi0, out0, prod_lo1, prod_hi1, out1);
+        for (size_t k = 0; k < 8; k++) {
+            r->coeffs[i + k] = out0[k];
+            r->coeffs[i + 8 + k] = out1[k];
+        }
+    }
+#else
     for (i = 0; i < KYBER_N; i++) {
         r->coeffs[i] = PQCLEAN_MLKEM1024_CLEAN_montgomery_reduce((int32_t)r->coeffs[i] * f);
     }
+#endif
 }
 
 /*************************************************
@@ -273,9 +410,37 @@ void PQCLEAN_MLKEM1024_CLEAN_poly_tomont(poly *r) {
 **************************************************/
 void PQCLEAN_MLKEM1024_CLEAN_poly_reduce(poly *r) {
     size_t i;
+#ifdef MLKEM_PIE
+    const int16_t v = ((1 << 26) + KYBER_Q / 2) / KYBER_Q;
+    int16_t vvec[8] __attribute__((aligned(16)));
+    int16_t prod_lo0[8] __attribute__((aligned(16)));
+    int16_t prod_hi0[8] __attribute__((aligned(16)));
+    int16_t prod_lo1[8] __attribute__((aligned(16)));
+    int16_t prod_hi1[8] __attribute__((aligned(16)));
+
+    for (i = 0; i < 8; i++) {
+        vvec[i] = v;
+    }
+
+    for (i = 0; i < KYBER_N; i += 16) {
+        mlkem_pie_mul_lohi_8x2(vvec, &r->coeffs[i], prod_lo0, prod_hi0,
+                               vvec, &r->coeffs[i + 8], prod_lo1, prod_hi1);
+        for (size_t k = 0; k < 8; k++) {
+            int32_t prod = ((int32_t)prod_hi0[k] << 16) | (uint16_t)prod_lo0[k];
+            int32_t t = (prod + (1 << 25)) >> 26;
+            r->coeffs[i + k] = (int16_t)(r->coeffs[i + k] - (int16_t)(t * KYBER_Q));
+        }
+        for (size_t k = 0; k < 8; k++) {
+            int32_t prod = ((int32_t)prod_hi1[k] << 16) | (uint16_t)prod_lo1[k];
+            int32_t t = (prod + (1 << 25)) >> 26;
+            r->coeffs[i + 8 + k] = (int16_t)(r->coeffs[i + 8 + k] - (int16_t)(t * KYBER_Q));
+        }
+    }
+#else
     for (i = 0; i < KYBER_N; i++) {
         r->coeffs[i] = PQCLEAN_MLKEM1024_CLEAN_barrett_reduce(r->coeffs[i]);
     }
+#endif
 }
 
 /*************************************************
@@ -289,9 +454,15 @@ void PQCLEAN_MLKEM1024_CLEAN_poly_reduce(poly *r) {
 **************************************************/
 void PQCLEAN_MLKEM1024_CLEAN_poly_add(poly *r, const poly *a, const poly *b) {
     size_t i;
+#ifdef MLKEM_PIE
+    for (i = 0; i < KYBER_N; i += 8) {
+        mlkem_pie_add_8(&a->coeffs[i], &b->coeffs[i], &r->coeffs[i]);
+    }
+#else
     for (i = 0; i < KYBER_N; i++) {
         r->coeffs[i] = a->coeffs[i] + b->coeffs[i];
     }
+#endif
 }
 
 /*************************************************
@@ -305,7 +476,13 @@ void PQCLEAN_MLKEM1024_CLEAN_poly_add(poly *r, const poly *a, const poly *b) {
 **************************************************/
 void PQCLEAN_MLKEM1024_CLEAN_poly_sub(poly *r, const poly *a, const poly *b) {
     size_t i;
+#ifdef MLKEM_PIE
+    for (i = 0; i < KYBER_N; i += 8) {
+        mlkem_pie_sub_8(&a->coeffs[i], &b->coeffs[i], &r->coeffs[i]);
+    }
+#else
     for (i = 0; i < KYBER_N; i++) {
         r->coeffs[i] = a->coeffs[i] - b->coeffs[i];
     }
+#endif
 }
