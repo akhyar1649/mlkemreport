@@ -5,29 +5,29 @@
 - S: 0.484
 
 ## Performance objective (Entropy)
-- L: 0.288
-- E: 0.223
-- C: 0.276
-- J: 0.212
+- L: 0.234
+- E: 0.265
+- C: 0.319
+- J: 0.183
 - Ploss: 0.000
 
 ## Performance final (Hybrid)
-- L: 0.294
-- E: 0.262
-- C: 0.288
-- J: 0.131
+- L: 0.267
+- E: 0.283
+- C: 0.309
+- J: 0.116
 - Ploss: 0.025
 
 ## Security objective (Entropy)
-- Pr: 0.375
-- K: 0.364
+- Pr: 0.392
+- K: 0.380
 - Co: 0.000
-- R: 0.261
+- R: 0.228
 
 ## Security final (Hybrid)
-- Pr: 0.388
-- K: 0.307
+- Pr: 0.396
+- K: 0.315
 - Co: 0.150
-- R: 0.155
+- R: 0.139
 
 Notes: objective weights are computed per-mode; priors reflect domain assumptions and can be edited.

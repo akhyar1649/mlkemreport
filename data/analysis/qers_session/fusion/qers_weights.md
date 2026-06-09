@@ -8,16 +8,16 @@
 - Co orientation = cost
 
 ## Performance weights (L, J, Ploss, E, C)
-- L: 0.294
-- J: 0.131
+- L: 0.267
+- J: 0.116
 - Ploss: 0.025
-- E: 0.262
-- C: 0.288
+- E: 0.283
+- C: 0.309
 - CR(perf) = 0.000
 
 ## Security weights (Pr, K, R, Co)
-- Pr: 0.388
-- K: 0.307
-- R: 0.155
+- Pr: 0.396
+- K: 0.315
+- R: 0.139
 - Co: 0.150
 - CR(sec) = 0.000
