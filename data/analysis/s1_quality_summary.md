@@ -1,0 +1,8 @@
+| variant     | pie    | mode    | n_total | n_success | packet_loss_rate | ss_valid_rate_all | ss_valid_rate_success |
+| ----------- | ------ | ------- | ------- | --------- | ---------------- | ----------------- | --------------------- |
+| ML-KEM-1024 | pieoff | session | 95      | 95        | 0                | 1                 | 1                     |
+| ML-KEM-1024 | pieon  | session | 95      | 95        | 0                | 1                 | 1                     |
+| ML-KEM-512  | pieoff | session | 95      | 95        | 0                | 1                 | 1                     |
+| ML-KEM-512  | pieon  | session | 95      | 95        | 0                | 1                 | 1                     |
+| ML-KEM-768  | pieoff | session | 95      | 95        | 0                | 1                 | 1                     |
+| ML-KEM-768  | pieon  | session | 95      | 95        | 0                | 1                 | 1                     |

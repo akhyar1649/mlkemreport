@@ -1,0 +1,159 @@
+menu "ML-KEM App"
+
+choice
+    prompt "ML-KEM variant"
+    default MLKEM_512
+
+config MLKEM_512
+    bool "ML-KEM-512"
+
+config MLKEM_768
+    bool "ML-KEM-768"
+
+config MLKEM_1024
+    bool "ML-KEM-1024"
+endchoice
+
+config MLKEM_PIE_OPT
+        bool "Enable PIE kernels (ESP32-S3)"
+        default n
+        help
+            Enable PIE-optimized ML-KEM kernels when available.
+            Disable to use the clean PQClean implementation.
+
+config MLKEM_PIE_AGGRESSIVE
+    bool "Enable aggressive PIE optimizations (batched SAR, vector tables)"
+    depends on MLKEM_PIE_OPT
+    default y
+    help
+        Enables more aggressive PIE optimizations such as batched SAR usage
+        and constant vector tables for PIE helpers.
+
+choice
+    prompt "Scenario"
+    default SCENARIO_2
+
+config SCENARIO_1
+    bool "Scenario 1 (MQTT handshake)"
+
+config SCENARIO_2
+    bool "Scenario 2 (local compute)"
+endchoice
+
+config MLKEM_ITERATIONS
+    int "Iterations per run"
+    default 100
+
+config MLKEM_SELFTEST
+    bool "Run KEM self-test before Scenario 2"
+    default n
+    help
+        Runs a single keygen/encaps/decaps and checks shared secrets.
+
+config MLKEM_MICROBENCH
+    bool "Enable NTT/invNTT/basemul microbench (Scenario 2)"
+    default n
+    help
+        Emit extra s2 rows for microbench ops before normal Scenario 2 loop.
+
+config MLKEM_MICROBENCH_ITERS
+    int "Microbench iterations"
+    default 10
+    depends on MLKEM_MICROBENCH
+
+config MLKEM_UART_BAUDRATE
+    int "CSV UART baudrate"
+    default 921600
+
+config WIFI_SSID
+    string "Wi-Fi SSID"
+    default "KUMALA_10"
+
+config WIFI_PASSWORD
+    string "Wi-Fi password"
+    default "kumalasari10"
+
+config MQTT_BROKER_URI
+    string "MQTT broker URI"
+    default "mqtt://192.168.1.10:1883"
+
+config MQTT_USERNAME
+    string "MQTT username"
+    default "user"
+
+config MQTT_PASSWORD
+    string "MQTT password"
+    default "pass"
+
+config MQTT_TOPIC_PUBKEY
+    string "MQTT topic (pubkey)"
+    default "pqc/handshake/pubkey"
+
+config MQTT_TOPIC_CIPHERTEXT
+    string "MQTT topic (ciphertext)"
+    default "pqc/handshake/ciphertext"
+
+config MQTT_QOS
+    int "MQTT QoS"
+    range 0 2
+    default 1
+
+config MQTT_RECONNECT_EACH_ITER
+    bool "Reconnect MQTT each iteration"
+    default y
+
+config MQTT_HANDSHAKE_TIMEOUT_MS
+    int "Handshake timeout (ms)"
+    default 5000
+
+config INA219_I2C_PORT
+    int "INA219 I2C port"
+    default 0
+
+config INA219_I2C_SDA_GPIO
+    int "INA219 SDA GPIO"
+    default 8
+
+config INA219_I2C_SCL_GPIO
+    int "INA219 SCL GPIO"
+    default 9
+
+config INA219_ADDR
+    hex "INA219 I2C address"
+    default 0x40
+
+config INA219_SHUNT_MILLIOHM
+    int "INA219 shunt resistor (mOhm)"
+    default 100
+
+config INA219_MAX_CURRENT_MA
+    int "INA219 max expected current (mA)"
+    default 1000
+
+choice
+    prompt "INA219 ADC mode"
+    default INA219_ADC_12BIT_8S
+
+config INA219_ADC_12BIT_8S
+    bool "12-bit 8-sample (4.26ms)"
+
+config INA219_ADC_12BIT_16S
+    bool "12-bit 16-sample (8.51ms)"
+
+config INA219_ADC_12BIT_1S
+    bool "12-bit 1-sample (532us)"
+endchoice
+
+config INA219_SAMPLE_PERIOD_MS
+    int "INA219 sample period (ms)"
+    default 2
+
+config INA219_I2C_FREQ_HZ
+    int "INA219 I2C frequency (Hz)"
+    default 400000
+
+config RSSI_SAMPLE_EVERY_ITER
+    bool "Sample RSSI every iteration"
+    default y
+
+endmenu

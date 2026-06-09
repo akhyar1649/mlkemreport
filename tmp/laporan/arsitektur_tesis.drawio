@@ -1,0 +1,139 @@
+<mxfile host="Electron" modified="2023-10-24T12:00:00.000Z" agent="Mozilla/5.0" etag="test" version="22.0.0" type="device">
+  <diagram id="D1" name="1. Alur Penelitian Umum">
+    <mxGraphModel dx="1000" dy="1000" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="start" value="Start" style="ellipse;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="360" y="40" width="80" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="prep" value="Persiapan ML-KEM &amp;amp; ESP32-S3" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="320" y="120" width="160" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="compile" value="Kompilasi Firmware:&#xa;1. Software NTT&#xa;2. PIE NTT" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="320" y="220" width="160" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="s2" value="Skenario 2:&#xa;Local Compute" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="220" y="320" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="s1" value="Skenario 1:&#xa;MQTT Handshake" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="460" y="320" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="preproc" value="Preprocessing Data:&#xa;Drop 5 iterasi, Hitung p50" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="320" y="420" width="160" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="qers" value="Kalkulasi QERS&#xa;(Bobot EWM + Prior)" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="320" y="520" width="160" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="analysis" value="Analisis Speedup &amp;amp; QERS" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="320" y="620" width="160" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="end" value="End" style="ellipse;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="360" y="720" width="80" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="e1" edge="1" source="start" target="prep" parent="1"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="e2" edge="1" source="prep" target="compile" parent="1"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="e3" edge="1" source="compile" target="s2" parent="1"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="e4" edge="1" source="compile" target="s1" parent="1"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="e5" edge="1" source="s2" target="preproc" parent="1"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="e6" edge="1" source="s1" target="preproc" parent="1"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="e7" edge="1" source="preproc" target="qers" parent="1"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="e8" edge="1" source="qers" target="analysis" parent="1"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="e9" edge="1" source="analysis" target="end" parent="1"><mxGeometry relative="1" as="geometry" /></mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+  <diagram id="D2" name="2. Arsitektur NTT SW vs PIE">
+    <mxGraphModel dx="1000" dy="1000" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="p_start" value="Fungsi poly_ntt()" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="320" y="40" width="160" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="sw_path" value="Software NTT (Baseline)" style="shape=hexagon;perimeter=hexagonPerimeter2;whiteSpace=wrap;html=1;fixedSize=1;" vertex="1" parent="1">
+          <mxGeometry x="160" y="120" width="160" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="pie_path" value="PIE NTT (Optimasi)" style="shape=hexagon;perimeter=hexagonPerimeter2;whiteSpace=wrap;html=1;fixedSize=1;" vertex="1" parent="1">
+          <mxGeometry x="480" y="120" width="160" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="sw_1" value="Loop Linear per elemen" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="160" y="200" width="160" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="sw_2" value="Scalar Butterfly&#xa;(1x Load, 1x Math)" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="160" y="280" width="160" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="pie_1" value="Load 8 elemen koefisien&#xa;ke Vektor 128-bit (q0-q7)" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="480" y="200" width="160" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="pie_2" value="SIMD Math (EE.VADDS / EE.VMUL)&#xa;8-lane Paralel Butterfly" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="480" y="300" width="160" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="out" value="Polinomial Domain NTT" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="320" y="420" width="160" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="p1" edge="1" source="p_start" target="sw_path" parent="1"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="p2" edge="1" source="p_start" target="pie_path" parent="1"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="p3" edge="1" source="sw_path" target="sw_1" parent="1"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="p4" edge="1" source="sw_1" target="sw_2" parent="1"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="p5" edge="1" source="sw_2" target="out" parent="1"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="p6" edge="1" source="pie_path" target="pie_1" parent="1"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="p7" edge="1" source="pie_1" target="pie_2" parent="1"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="p8" edge="1" source="pie_2" target="out" parent="1"><mxGeometry relative="1" as="geometry" /></mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+  <diagram id="D3" name="3. Skema Hardware">
+    <mxGraphModel dx="1000" dy="1000" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="power" value="Catu Daya 5V" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="120" y="160" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="ina" value="INA219 (Power Sensor)&#xa;I2C" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#dae8fc;" vertex="1" parent="1">
+          <mxGeometry x="320" y="160" width="160" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="esp" value="ESP32-S3 (ML-KEM Node)&#xa;+ UART CP2102" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#d5e8d4;" vertex="1" parent="1">
+          <mxGeometry x="560" y="160" width="160" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="router" value="Router OpenWrt&#xa;(MQTT Broker, Ch 11, VLAN)" style="ellipse;shape=cloud;whiteSpace=wrap;html=1;fillColor=#fff2cc;" vertex="1" parent="1">
+          <mxGeometry x="540" y="320" width="200" height="120" as="geometry" />
+        </mxCell>
+        <mxCell id="laptop" value="Laptop MQTT Subscriber" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="240" y="350" width="160" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="h1" edge="1" source="power" target="ina" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="h2" edge="1" source="ina" target="esp" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="h3" edge="1" source="esp" target="router" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+          <mxCell value="Wi-Fi (Wireless)" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" vertex="1" connectable="0" parent="h3">
+            <mxGeometry x="-0.2" y="2" relative="1" as="geometry">
+              <mxPoint as="offset" />
+            </mxGeometry>
+          </mxCell>
+        </mxCell>
+        <mxCell id="h4" edge="1" source="router" target="laptop" parent="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="h5" edge="1" source="ina" target="esp" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="400" y="120" />
+              <mxPoint x="640" y="120" />
+            </Array>
+          </mxGeometry>
+          <mxCell value="I2C Data (SDA/SCL) ke GPIO 8/9" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" vertex="1" connectable="0" parent="h5">
+            <mxGeometry x="0.1" y="-1" relative="1" as="geometry">
+              <mxPoint x="-1" y="-11" as="offset" />
+            </mxGeometry>
+          </mxCell>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
